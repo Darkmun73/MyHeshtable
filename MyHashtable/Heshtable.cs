@@ -6,19 +6,26 @@ using System.Threading.Tasks;
 
 namespace MyHeshtable
 {
-    enum Status { empty, filled, deleted } // 0..2
+    public enum Status { empty, filled, deleted } // 0..2
 
-    struct RecipeWithStatus
+    public class Heshtable
     {
-        public Recipe recipe;
-        public Status status;
-    }
-
-    class Heshtable
-    {
+        public struct RecipeWithStatus
+        {
+            public Recipe recipe;
+            public Status status;
+        }
 
         private int _size;
         private RecipeWithStatus[] _records;
+        public RecipeWithStatus[] Records //вместо этого перегрузить квадратные скобочик(индекс)
+        {
+            get { return _records; }
+        }
+        public int Size
+        {
+            get { return _size; }
+        }
         public Heshtable()
         {
             _size = 10;
@@ -108,6 +115,41 @@ namespace MyHeshtable
             {
                 if ((_records[currentAddress].status == Status.filled)
                     && (_records[currentAddress].recipe == recipe))
+                {
+                    return currentAddress;
+                }
+                currentAddress = Hesh2(currentAddress);
+            }
+            return -1;
+        }
+        
+        public int SearchByKeys(string keyName, string keyAuthor, ref int count)
+        {
+            count = 0;
+            string key = keyName + keyAuthor;
+
+            int currentAddress = Hesh1(key);
+            for (int i = 0; (i < _size) && (_records[currentAddress].status != Status.empty); i++)
+            {
+                count++;
+                if ((_records[currentAddress].status == Status.filled)
+                    && (_records[currentAddress].recipe._name == keyName) && (_records[currentAddress].recipe._author == keyAuthor))
+                {
+                    return currentAddress;
+                }
+                currentAddress = Hesh2(currentAddress);
+            }
+            return -1;
+        }
+        public int SearchByKeys(string keyName, string keyAuthor)
+        {
+            string key = keyName + keyAuthor;
+
+            int currentAddress = Hesh1(key);
+            for (int i = 0; (i < _size) && (_records[currentAddress].status != Status.empty); i++)
+            {
+                if ((_records[currentAddress].status == Status.filled)
+                    && (_records[currentAddress].recipe._name == keyName) && (_records[currentAddress].recipe._author == keyAuthor))
                 {
                     return currentAddress;
                 }
